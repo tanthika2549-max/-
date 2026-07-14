@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>ระบบจัดการสต็อก - บ้านของชำ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- ✅ เปลี่ยนเป็นไลบรารีใหม่ที่เสถียรกว่า รองรับบาร์โค้ดทุกชนิด -->
+    <script src="https://unpkg.com/@zxing/library@latest/umd/index.min.js"></script>
+    <style>
+        * { font-family: 'Noto Sans Thai', system-ui, -apple-system, sans-serif; box-sizing: border-box; }
+        body { background: #fff8fb; color: #554858; padding: 0 20px 25px; margin: 0; }
+
+        .top-nav { 
+            max-width: 100%;
+            margin: 0 auto 22px; 
+            padding: 12px 25px; 
+            border-radius: 0 0 28px 28px; 
+            background: #ffffff; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            gap: 20px; 
+            flex-wrap: wrap; 
+            position: sticky; 
+            top: 0; 
+            z-index: 999; 
+        }
+        .brand-mark { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            font-weight: 800; 
+            color: #9b7aa8; 
+            font-size: 18px; 
+        }
+        .brand-icon { 
+            width: 48px; 
+            height: 48px; 
+            border-radius: 16px; 
+            background: #f3e5f5; 
+            display: grid; 
+            place-items: center; 
+            overflow: hidden;
+            background-image: url('https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-hoysfVCXwcawKj1Kr7C6goZVRR1sP9.png&w=1000&q=75'); 
+            background-size: cover; 
+            background-position: center; 
+        }
+        .brand-text small { display: block; color: #928398; font-size: 12px; font-weight: 600; margin-top: -2px; }
+        .nav-links { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            flex-wrap: wrap; 
+        }
+        .nav-link { 
+            color: #928398; 
+            text-decoration: none; 
+            font-weight: 600; 
+            font-size: 15px; 
+            padding: 10px 16px; 
+            border-radius: 20px; 
+            transition: all 0.2s ease; 
+        }
+        .nav-link:hover { 
+            background: #f9f2f7; 
+            color: #9b7aa8; 
+        }
+        .nav-link.active { 
+            background: #e78ab8; 
+            color: #ffffff; 
+            box-shadow: 0 2px 8px rgba(231,138,184,0.3); 
+        }
+        
+        .main-layout { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 1fr 380px; gap: 25px; }
+        
+        .card { background: white; padding: 25px; border-radius: 24px; box-shadow: 0 12px 28px rgba(210,190,218,0.22); border: 1px solid #f1e3ef; margin-bottom: 25px; }
+        h2, h3 { margin: 0 0 20px 0; color: #9b7aa8; display: flex; align-items: center; gap: 10px; font-size: 20px; }
+        h3 { font-size: 18px; border-bottom: 2px dashed #f1e3ef; padding-bottom: 10px; }
+        
+        .dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 25px; }
+        .dash-item { padding: 15px; border-radius: 16px; text-align: center; background: #fff0f7; border: 1px solid #f1d7e6; }
+        .dash-item.alert { background: #fff4e8; border-color: #f3dcc0; }
+        .dash-num { font-size: 24px; font-weight: bold; color: #9b7aa8; margin-top: 5px; }
+        .dash-item.alert .dash-num { color: #c99a7a; }
+
+        .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 15px; width: 100%; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+        label { font-size: 13px; font-weight: 600; color: #7a6e71; }
+        
+        input, select { 
+            padding: 12px; 
+            border: 2px solid #f1e3ef; 
+            border-radius: 14px; 
+            font-size: 14px; 
+            outline: none; 
+            transition: 0.2s; 
+            background: #fff; 
+            width: 100%; 
+            box-sizing: border-box; 
+        }
+        input:focus, select:focus { border-color: #d9a3c9; box-shadow: 0 0 0 3px rgba(217,163,201,0.22); }
+        
+        .btn-main { 
+            background: #e78ab8; 
+            color: #4f3345; 
+            border: none; 
+            padding: 12px;
+            border-radius: 14px;
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 15px;
+            width: 100%;
+            box-shadow: 0 4px 0 #d47bab; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 6px; 
+            transition: 0.1s;
+        }
+        .btn-main:hover { filter: brightness(1.05); }
+        .btn-main:active { transform: translateY(3px); box-shadow: 0 1px 0 #d9a3c9; }
+        
+        .btn-reset-form { background: #fff6bd; box-shadow: 0 4px 0 #e4d982; color: #554858; }
+        .btn-reset-form:hover { background: #ffc4bc; }
+        .btn-reset-form:active { transform: translateY(3px); box-shadow: 0 1px 0 #e09285; }
+
+        .btn-purple { background: #d7bfdc; box-shadow: 0 4px 0 #bfa7c6; color: #554858; }
+        .btn-purple:hover { background: #e2cde7; }
+        .btn-purple:active { transform: translateY(3px); box-shadow: 0 1px 0 #bfa7c6; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #f1e3ef; vertical-align: middle; }
+        th { background: #fff0f7; color: #9b7aa8; font-weight: bold; }
+        tr:hover { background: #fffbfd; }
+        
+        .img-container { width: 50px; height: 50px; border-radius: 10px; overflow: hidden; border: 1px solid #f0e4e6; background: #fff; display: flex; align-items: center; justify-content: center; }
+        .stock-img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .badge { padding: 4px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; display: inline-block; }
+        .badge-dry { background: #fff3e0; color: #fb8c00; }
+        .badge-drinks { background: #e8f5e9; color: #43a047; }
+        .badge-snacks { background: #e3f2fd; color: #1e88e5; }
+        .badge-fresh { background: #fce4ec; color: #d81b60; }
+        .badge-household { background: #f3e5f5; color: #8e24aa; }
+        .badge-medical { background: #e0f2f1; color: #00897b; }
+        .badge-danger { background: #ffebee; color: #e53935; font-weight: bold; animation: blink 1.5s infinite; }
+        
+        .action-btns { display: flex; gap: 6px; justify-content: center; flex-wrap: wrap; }
+        .btn-sm { padding: 6px 12px; font-size: 13px; border-radius: 10px; border: none; color: #554858; font-weight: bold; cursor: pointer; transition: 0.1s; display: inline-flex; align-items: center; gap: 4px; }
+        .btn-sm:active { transform: translateY(2px); }
+        
+        .btn-sm.add { background: #c6e4d5; box-shadow: 0 3px 0 #9dc9b5; }
+        .btn-sm.edit { background: #94d2e8; box-shadow: 0 3px 0 #70b6ce; }
+        .btn-sm.del { background: #e78ab8; box-shadow: 0 3px 0 #d47bab; } 
+        .btn-sm.del:hover { background: #f0a8c8; }
+
+        @keyframes blink { 50% { opacity: 0.5; } }
+        @media (max-width: 900px) { 
+            .top-nav { padding: 10px 15px; flex-direction: column; align-items: flex-start; } 
+            .nav-links { width: 100%; justify-content: flex-start; margin-top: 8px; } 
+            .main-layout, .dash-grid { grid-template-columns: 1fr; } 
+        }
+
+        /* ✅ ปรับส่วนกล้องให้ทำงานง่ายที่สุด */
+        .barcode-scan-area { 
+            background: #f9f2f7; 
+            border-radius: 14px; 
+            padding: 15px; 
+            border: 2px dashed #e78ab8; 
+            margin-bottom: 15px; 
+        }
+        #scanVideo { 
+            width: 100%; 
+            max-height: 260px;
+            border-radius: 10px; 
+            margin-top: 8px; 
+            display: none;
+            object-fit: cover;
+            background: #eee;
+        }
+        #scanResult { 
+            margin-top: 10px; 
+            font-weight: bold; 
+            color: #9b7aa8; 
+            font-size: 14px;
+            text-align: center;
+            min-height: 24px;
+            padding: 6px;
+            border-radius: 8px;
+            background: #fff;
+        }
+        .scan-tip { font-size: 12px; color: #928398; text-align: center; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<nav class="top-nav">
+    <div class="brand-mark">
+        <span class="brand-icon"></span>
+        <span class="brand-text">บ้านของชำ</span>
+    </div>
+    <div class="nav-links">
+        <a class="nav-link active" href="stock.html">📋 สต็อกสินค้า</a>
+        <a class="nav-link" href="project.html">🛍️ หมวดหมู่</a>
+        <a class="nav-link" href="money.html">💵 คิดเงิน</a>
+        <a class="nav-link" href="account.html">👤 ข้อมูลร้าน</a>
+    </div>
+</nav>
+
+<div class="main-layout">
+    <div>
+        <div class="dash-grid">
+            <div class="dash-item">
+                <div>📦 รายการสินค้าทั้งหมดในระบบ</div>
+                <div class="dash-num" id="dashTotalItems">0</div>
+            </div>
+            <div class="dash-item">
+                <div>💰 มูลค่าสินค้าในคลังรวม (ทุน)</div>
+                <div class="dash-num"><span id="dashTotalCost">0.00</span> ฿</div>
+            </div>
+            <div class="dash-item alert" id="dashAlertCard">
+                <div>⚠️ สินค้าใกล้หมดสต็อก (< 10 ชิ้น)</div>
+                <div class="dash-num" id="dashLowStock">0</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📋 ตารางบริหารคลังสินค้าจริง</h2>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>รูป</th>
+                            <th>บาร์โค้ด / รหัส</th>
+                            <th>ชื่อสินค้า</th>
+                            <th>หมวดหมู่</th>
+                            <th>ทุน / ขาย</th>
+                            <th>คงเหลือ</th>
+                            <th style="text-align: center;">จัดการสต็อกด่วน</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stockTableBody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="card">
+            <h3 id="formTitle">➕ เพิ่มสินค้าใหม่เข้าคลัง</h3>
+            <input type="hidden" id="editProductId">
+            
+            <!-- ✅ ส่วนสแกนใหม่ ทำงานง่ายที่สุด -->
+            <div class="barcode-scan-area">
+                <label>📸 สแกนบาร์โค้ดเพื่อดึงรหัสอัตโนมัติ</label>
+                <div class="scan-tip">อนุญาตกล้อง → วางบาร์โค้ดให้ชัดเจน ระบบจะอ่านทันที</div>
+                <video id="scanVideo" playsinline></video>
+                <div style="display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap;">
+                    <button type="button" class="btn-main" style="background:#9b7aa8; box-shadow:0 4px 0 #7a5c85; flex:1;" onclick="startScan()">เปิดกล้องสแกน</button>
+                    <button type="button" class="btn-main" style="background:#e78ab8; box-shadow:0 4px 0 #d47bab; flex:1;" onclick="stopScan()">ปิดกล้อง</button>
+                </div>
+                <div id="scanResult"></div>
+            </div>
+
+            <div class="form-group">
+                <label>รหัสบาร์โค้ดสินค้า</label>
+                <input type="text" id="pBarcode" placeholder="เช่น 885000000001">
+            </div>
+            
+            <div class="form-group">
+                <label>ชื่อสินค้า</label>
+                <input type="text" id="pName" placeholder="เช่น บะหมี่กึ่งสำเร็จรูป มาม่า">
+            </div>
+
+            <div class="form-group">
+                <label>หมวดหมู่สินค้า</label>
+                <select id="pCategory">
+                    <option value="dry">🌾 ของแห้ง / เครื่องปรุง</option>
+                    <option value="drinks">🥤 เครื่องดื่ม / นม</option>
+                    <option value="fresh">🥩 ของสด / อาหารแช่แข็ง</option>
+                    <option value="household">🧼 ของใช้ในครัวเรือน</option>
+                    <option value="snacks">🍪 ขนม / ของกินเล่น</option>
+                    <option value="medical">💊 ยาสามัญ / สุขภาพ</option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>ราคาทุน (฿)</label>
+                    <input type="number" id="pCost" placeholder="0.00" min="0" step="0.01">
+                </div>
+                <div class="form-group">
+                    <label>ราคาขายหน้าร้าน (฿)</label>
+                    <input type="number" id="pPrice" placeholder="0.00" min="0" step="0.01">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>จำนวนสต็อกเริ่มต้น (ชิ้น)</label>
+                <input type="number" id="pQty" placeholder="0" min="0">
+            </div>
+
+            <div class="form-group">
+                <label>ลิงก์รูปภาพสินค้าจริง</label>
+                <input type="text" id="pImgUrl" placeholder="วางลิงก์รูปภาพตรงนี้">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                <div style="display: flex; gap: 10px;">
+                    <button id="btnSubmit" class="btn-main" onclick="saveProduct()" style="flex: 2;">💾 บันทึกสินค้า</button>
+                    <button id="btnReset" class="btn-main btn-reset-form" onclick="resetForm()" style="flex: 1;">🧹 รีเซ็ต</button>
+                </div>
+                <button id="btnCancel" class="btn-main" onclick="cancelEdit()" style="display: none; background: #6c5ce7; box-shadow: 0 4px 0 #5343c7;">ยกเลิกการแก้ไข</button>
+            </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button onclick="loadDefaultMaster()" class="btn-main btn-purple" style="font-size: 13px;">🔄 โหลดสินค้าเริ่มต้น</button>
+            <button onclick="clearAllStock()" class="btn-main btn-reset-form" style="font-size: 13px; background: #e06d75; box-shadow: 0 4px 0 #b8535a;">🗑️ ล้างสต็อกทั้งหมด</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const defaultMaster = [
+        { id: 11, barcode: "885012345601", name: "บะหมี่กึ่งสำเร็จรูป มาม่า", cat: "dry", cost: 5.50, price: 7.00, qty: 24, img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-YVYDh5ken27Co8yX09kdpYXh3ofeTb.png&w=1000&q=75" },
+        { id: 12, barcode: "885012345602", name: "ข้าวหอมมะลิถุงเล็ก", cat: "dry", cost: 32.00, price: 39.00, qty: 12, img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-A9eIgv4xhD8XwN8vkvBYY10vCzwTzv.png&w=1000&q=75" },
+        { id: 13, barcode: "885012345603", name: "น้ำปลาแท้", cat: "dry", cost: 18.00, price: 25.00, qty: 18, img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-jOrMowRxLengEwE8ojWKXVoZbStgkp.png&w=1000&q=75" },
+        { id: 21, barcode: "885012345604", name: "นมสดพาสเจอร์ไรส์", cat: "drinks", cost: 9.00, price: 12.00, qty: 9, img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-F4jqbQsCy0pBaRzc71QYwUkrAkvZi6.png&w=1000&q=75" },
+        { id: 22, barcode: "885012345605", name: "น้ำดื่มขวดเล็ก", cat: "drinks", cost: 4.00, price: 7.00, qty: 36, img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-bmzLfyohXRZfMKDJgxQZocCGuZP9sC.png&w=1000&q=75" },
+        { id: 23, barcode: "885012345606", name: "โค้กกระป๋อง", cat: "drinks", cost: 12.00, price: 18.00, qty: 20, img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-qbEZLL3VigCxLQqH3P7QOv9uIt2IgQ.png&w=1000&q=75" },
+        { id: 31, barcode: "885012345607", name: "เนื้อหมูสันนอก", cat: "fresh", cost: 110.00, price: 130.00, qty: 10, img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-bjTbReUbMZPhSuv5pHGOb7mo385h48.png&w=1000&q=75" },
+        { id: 32, barcode: "885012345608", name: "เนื้อไก่", cat: "fresh", cost: 65.00, price: 75.00, qty: 14, img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-sIZsICFRGAPfrFWKM5QgISnhWxEknB.png&w=1000&q=75" },
+        { id: 33, barcode: "885012345609", name: "ไข่ไก่แพ็ก 10 ฟอง", cat: "fresh", cost: 18.00, price: 25.00, qty: 8, img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-yf35vuDiJ4sYPcverfgWcCZZvjaDnc.png&w=1000&q=75" },
+        { id: 41, barcode: "885012345610", name: "น้ำยาล้างจาน", cat: "household", cost: 18.00, price: 25.00, qty: 16, img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-qvlZE5S9N1mbf2vsXj8KCfFx2V1dfA.png&w=1000&q=75" },
+        { id: 42, barcode: "885012345611", name: "สบู่ก้อน", cat: "household", cost: 9.00, price: 13.00, qty: 30, img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-0EumVwFuSrcJSbTbqi6NGpq8ddFGKB.png&w=1000&q=75" },
+        { id: 43, barcode: "885012345612", name: "กระดาษทิชชู่", cat: "household", cost: 20.00, price: 29.00, qty: 18, img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-RcxHkjUdGdFrHiaOfPUEwAIm6NeRC4.png&w=1000&q=75" },
+        { id: 51, barcode: "885012345613", name: "มันฝรั่งทอดกรอบ เลย์", cat: "snacks", cost: 15.00, price: 20.00, qty: 15, img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-qQM0EOJFmJ5nW6ecSmRSNEyC67MhLx.png&w=1000&q=75" },
+        { id: 52, barcode: "885012345614", name: "คุกกี้กล่องเล็ก", cat: "snacks", cost: 18.00, price: 25.00, qty: 22, img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-zYmK8CwOnZSBNPiZ3lKE3jXLBrsi7g.png&w=1000&q=75" },
+        { id: 53, barcode: "885012345615", name: "ช็อกโกแลตแท่ง", cat: "snacks", cost: 12.00, price: 18.00, qty: 19, img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-7A67shmAxn3I6JFLINSfPdOc1q6LzB.png&w=1000&q=75" },
+        { id: 61, barcode: "885012345616", name: "ยาพาราเซตามอล", cat: "medical", cost: 18.00, price: 25.00, qty: 12, img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-z1ggj8Abs6NsYbHDMVviQpUdzgFudR.png&w=1000&q=75" },
+        { id: 62, barcode: "885012345617", name: "พลาสเตอร์ปิดแผล", cat: "medical", cost: 2.00, price: 5.00, qty: 25, img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-7yiU0MjbaL2wmQUiRa7RaDh2aqYnog.png&w=1000&q=75"},
+        { id: 63, barcode: "885012345618", name: "แอลกอฮอล์ล้างแผล", cat: "medical", cost: 28.00, price: 39.00, qty: 14, img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-AddCZZif2hlITBVkWKAeXZXYwii2lo.png&w=1000&q=75" }
+    ];
+
+    let stockData = JSON.parse(localStorage.getItem('advancedShopStockMaster')) || [];
+    let scanWorker = null;
+
+    window.onload = () => {
+        if (stockData.length === 0) {
+            stockData = [...defaultMaster];
+            localStorage.setItem('advancedShopStockMaster', JSON.stringify(stockData));
+        }
+        renderStockTable();
+    };
+
+    function renderStockTable() {
+        const tbody = document.getElementById('stockTableBody');
+        tbody.innerHTML = '';
+        let totalItems = stockData.length, totalCost = 0, lowStockCount = 0;
+
+        if (totalItems === 0) {
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#aaa; padding: 30px;">❌ ไม่มีสินค้าในระบบ โปรดกดปุ่มโหลดสินค้าเริ่มต้นด้านล่าง</td></tr>`;
+        }
+
+        stockData.forEach(p => {
+            totalCost += (p.cost * p.qty);
+            if (p.qty < 10) lowStockCount++;
+
+            let catName = '🌾 ของแห้ง';
+            if(p.cat === 'drinks') catName = '🥤 เครื่องดื่ม / นม';
+            if(p.cat === 'fresh') catName = '🥩 ของสด / อาหารแช่แข็ง';
+            if(p.cat === 'household') catName = '🧼 ของใช้';
+            if(p.cat === 'snacks') catName = '🍪 ขนม';
+            if(p.cat === 'medical') catName = '💊 ยาสามัญ';
+
+            let qtyDisplay = p.qty === 0 ? `<span class="badge badge-danger">หมดสต็อก</span>` : p.qty < 10 ? `<strong style="color: #c99a7a; font-size:15px;">${p.qty}</strong> <span style="font-size:11px;color:#c99a7a;">(ใกล้หมด)</span>` : `<strong style="color: #9b7aa8; font-size:15px;">${p.qty}</strong>`;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><div class="img-container"><img src="${p.img || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=100'}" class="stock-img"></div></td>
+                    <td style="font-family: monospace; font-weight: bold; color: #777;">${p.barcode || p.id}</td>
+                    <td><strong>${p.name}</strong></td>
+                    <td><span class="badge badge-${p.cat}">${catName}</span></td>
+                    <td><small style="color:#928398;">ทุน: ${p.cost.toFixed(2)}</small><br><strong style="color:#9b7aa8;">ขาย: ${p.price.toFixed(2)}</strong></td>
+                    <td>${qtyDisplay}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-sm add" onclick="quickAdd(${p.id})">➕ เติมของ</button>
+                            <button class="btn-sm edit" onclick="editProduct(${p.id})">✍️ แก้ไข</button>
+                            <button class="btn-sm del" onclick="deleteProduct(${p.id})">❌ ลบ</button>
+                        </div>
+                    </td>
+                </tr>`;
+        });
+
+        document.getElementById('dashTotalItems').innerText = totalItems;
+        document.getElementById('dashTotalCost').innerText = totalCost.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('dashLowStock').innerText = lowStockCount;
+        
+        const alertCard = document.getElementById('dashAlertCard');
+        if(lowStockCount > 0) { alertCard.classList.add('alert'); } else { alertCard.classList.remove('alert'); }
+    }
+
+    function quickAdd(id) {
+        const item = stockData.find(i => i.id === id);
+        if (item) { item.qty += 5; saveAndRefresh(); }
+    }
+
+    function saveProduct() {
+        const idField = document.getElementById('editProductId').value;
+        const barcode = document.getElementById('pBarcode').value.trim();
+        const name = document.getElementById('pName').value.trim();
+        const cat = document.getElementById('pCategory').value;
+        const cost = parseFloat(document.getElementById('pCost').value) || 0;
+        const price = parseFloat(document.getElementById('pPrice').value) || 0;
+        const qty = parseInt(document.getElementById('pQty').value) || 0;
+        const img = document.getElementById('pImgUrl').value.trim();
+
+        if (!name || !barcode) return alert('กรุณากรอกรหัสบาร์โค้ดและชื่อสินค้าด้วยนะครับ 🛒');
+
+        const duplicate = stockData.find(i => i.barcode === barcode && i.id != idField);
+        if (duplicate) return alert('❌ รหัสสินค้านี้มีในระบบแล้วครับ!');
+
+        if (idField) {
+            const item = stockData.find(i => i.id == idField);
+            if (item) { Object.assign(item, { barcode, name, cat, cost, price, qty, img }); }
+        } else {
+            stockData.push({ id: new Date().getTime(), barcode, name, cat, cost, price, qty, img });
+        }
+
+        saveAndRefresh(); resetForm(); alert('🎉 บันทึกสินค้าสำเร็จเรียบร้อยแล้วครับ!');
+    }
+
+    function editProduct(id) {
+        const item = stockData.find(i => i.id === id);
+        if (item) {
+            document.getElementById('formTitle').innerText = "✍️ แก้ไขข้อมูลสินค้า";
+            document.getElementById('editProductId').value = item.id;
+            document.getElementById('pBarcode').value = item.barcode;
+            document.getElementById('pName').value = item.name;
+            document.getElementById('pCategory').value = item.cat;
+            document.getElementById('pCost').value = item.cost;
+            document.getElementById('pPrice').value = item.price;
+            document.getElementById('pQty').value = item.qty;
+            document.getElementById('pImgUrl').value = item.img;
+            document.getElementById('btnCancel').style.display = "block";
+            document.getElementById('pName').focus();
+        }
+    }
+
+    function cancelEdit() { resetForm(); }
+
+    function deleteProduct(id) {
+        if (confirm('คุณแน่ใจใช่ไหมว่าจะลบสินค้ารายการนี้ออกจากระบบสต็อก?')) { stockData = stockData.filter(i => i.id !== id); saveAndRefresh(); }
+    }
+
+    function saveAndRefresh() { localStorage.setItem('advancedShopStockMaster', JSON.stringify(stockData)); renderStockTable(); }
+
+    function resetForm() {
+        document.getElementById('formTitle').innerText = "➕ เพิ่มสินค้าใหม่เข้าคลัง";
+        document.getElementById('editProductId').value = "";
+        document.getElementById('pBarcode').value = "";
+        document.getElementById('pName').value = "";
+        document.getElementById('pCost').value = "";
+        document.getElementById('pPrice').value = "";
+        document.getElementById('pQty').value = "";
+        document.getElementById('pImgUrl').value = "";
+        document.getElementById('btnCancel').style.display = "none";
+        stopScan();
+    }
+
+    function loadDefaultMaster() {
+        if(confirm('ต้องการโหลดสินค้าเริ่มต้นตามหมวดหมู่ร้านค้าใช่ไหมครับ?')) { stockData = [...JSON.parse(JSON.stringify(defaultMaster))]; saveAndRefresh(); }
+    }
+
+    function clearAllStock() {
+        if(confirm('🚨 เตือน: คุณต้องการลบสินค้าทั้งหมดใช่หรือไม่?')) {
+            stockData = [];
+            saveAndRefresh();
+            resetForm();
+        }
+    }
+
+    // ✅ สแกนใหม่ รองรับทุกบาร์โค้ด ไม่กรองเลขเลย
+    async function startScan() {
+        stopScan();
+        const video = document.getElementById('scanVideo');
+        const resultBox = document.getElementById('scanResult');
+        resultBox.innerText = 'กำลังขออนุญาตกล้อง...';
+        video.style.display = 'block';
+
+        try {
+            // เริ่มกล้องหลังมือถือ
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }
+            });
+            video.srcObject = stream;
+            await video.play();
+
+            // เริ่มเครื่องสแกน
+            scanWorker = new ZXing.BrowserMultiFormatReader();
+            resultBox.innerText = '✅ พร้อมสแกนแล้ว วางบาร์โค้ดให้ชัดเจน';
+
+            scanWorker.decodeFromVideoDevice(null, 'scanVideo', (result, err) => {
+                if (result) {
+                    // เจอเลขแล้ว ใส่ลงช่องทันที ไม่ตรวจสอบอะไรเลย
+                    document.getElementById('pBarcode').value = result.text;
+                    resultBox.innerHTML = `✅ อ่านรหัสสำเร็จ: <strong>${result.text}</strong>`;
+                    stopScan(); // ปิดกล้องอัตโนมัติเมื่อเจอ
+                }
+                if (err && !(err instanceof ZXing.NotFoundException)) {
+                    console.error('สแกนผิดพลาด:', err);
+                }
+            });
+
+        } catch (err) {
+            console.error('เปิดกล้องไม่ได้:', err);
+            resultBox.innerText = '❌ เปิดกล้องไม่ได้ กรุณาอนุญาตการเข้าถึงกล้อง';
+            alert('กรุณาอนุญาตให้เว็บไซต์เข้าถึงกล้องในเบราว์เซอร์นะครับ ใช้งานได้ดีที่สุดบน Chrome/Edge/Safari');
+        }
+    }
+
+    function stopScan() {
+        // หยุดเครื่องสแกน
+        if (scanWorker) {
+            scanWorker.reset();
+            scanWorker = null;
+        }
+        // หยุดกล้อง
+        const video = document.getElementById('scanVideo');
+        if (video.srcObject) {
+            video.srcObject.getTracks().forEach(track => track.stop());
+            video.srcObject = null;
+        }
+        // ซ่อนวิดีโอและล้างข้อความ
+        video.style.display = 'none';
+        document.getElementById('scanResult').innerText = '';
+    }
+</script>
+</body>
+</html> 

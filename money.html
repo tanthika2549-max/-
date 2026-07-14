@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>คิดเงินบ้านของชำ 3D Mini + Auto Daily Report & History</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * { font-family: 'Noto Sans Thai', system-ui, sans-serif; box-sizing: border-box; }
+        body { background: #fff8fb; color: #554858; padding: 0 25px 25px; margin: 0; }
+
+        /* ✅ แก้แค่ส่วนนี้: แถบเมนูให้ตรงกับรูปแบบตัวอย่าง */
+        .top-nav { 
+            max-width: 100%;
+            margin: 0 auto 22px; 
+            padding: 12px 25px; 
+            border-radius: 0 0 28px 28px; 
+            background: #ffffff; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            gap: 20px; 
+            flex-wrap: wrap; 
+            position: sticky; 
+            top: 0; 
+            z-index: 999; 
+        }
+        .brand-mark { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            font-weight: 800; 
+            color: #9b7aa8; 
+            font-size: 18px; 
+        }
+        .brand-icon { 
+            width: 48px; 
+            height: 48px; 
+            border-radius: 16px; 
+            background: #f3e5f5; 
+            display: grid; 
+            place-items: center; 
+            overflow: hidden;
+            background-image: url('https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-hoysfVCXwcawKj1Kr7C6goZVRR1sP9.png&w=1000&q=75'); 
+            background-size: cover; 
+            background-position: center; 
+        }
+        .brand-icon img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .nav-links { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            flex-wrap: wrap; 
+        }
+        .nav-link { 
+            color: #928398; 
+            text-decoration: none; 
+            font-weight: 600; 
+            font-size: 15px; 
+            padding: 10px 16px; 
+            border-radius: 20px; 
+            transition: all 0.2s ease; 
+        }
+        .nav-link:hover { 
+            background: #f9f2f7; 
+            color: #9b7aa8; 
+        }
+        /* ✅ แก้แค่ส่วนนี้: สีปุ่ม active ให้ตรงกับรูปตัวอย่าง */
+        .nav-link.active { 
+            background: #e78ab8; 
+            color: #ffffff; 
+            box-shadow: 0 2px 8px rgba(231,138,184,0.3); 
+        }
+        
+        .container { max-width: 1100px; margin: 0 auto; display: grid; grid-template-columns: 1fr 340px; gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 20px; box-shadow: 5px 5px 15px #d1d9e6, -5px -5px 15px #fff; margin-bottom: 20px; }
+        h3 { margin: 0 0 10px 0; color: #9b7aa8; border-bottom: 2px dashed #f1e3ef; padding-bottom: 8px; }
+        .form-group { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+        
+        input, select, button { padding: 10px; border: 2px solid #e1e8ef; border-radius: 12px; font-size: 15px; outline: none; transition: 0.2s; }
+        input:focus, select:focus { border-color: #d9a3c9; box-shadow: 0 0 0 3px rgba(217,163,201,0.22); }
+        button { background: #e78ab8; color: #4f3345; border: none; cursor: pointer; font-weight: bold; box-shadow: 0 4px 0 #d47bab, 0 5px 10px rgba(0,0,0,0.1); }
+        button:active { transform: translateY(3px); box-shadow: 0 1px 0 #d9a3c9; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f0f4f9; }
+        th { background: #fff0f7; color: #9b7aa8; border-radius: 8px; }
+        .receipt { background: #fffdf7; border: 1px solid #eed; padding: 15px; border-radius: 12px; font-size: 13px; }
+        .flex-between { display: flex; justify-content: space-between; margin-bottom: 5px; }
+        
+        /* สไตล์ปุ่มขนาดเล็กในตาราง */
+        .btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 8px; margin-right: 3px; }
+        .btn-view { background: #c9b8ef; box-shadow: 0 2px 0 #a99ada; }
+        .btn-dl { background: #b8deda; box-shadow: 0 2px 0 #91c7c2; }
+        
+        /* สไตล์ตารางรายรับรายจ่าย */
+        .acc-table th { background: #f3e5f5; }
+        .profit-positive { color: #81c784; font-weight: bold; }
+        .profit-negative { color: #e57373; font-weight: bold; }
+        
+        @media (max-width: 768px) { 
+            .top-nav { 
+                padding: 10px 15px; 
+                flex-direction: column; 
+                align-items: flex-start; 
+            } 
+            .nav-links { 
+                width: 100%; 
+                justify-content: flex-start; 
+                margin-top: 8px; 
+            } 
+            .nav-link { 
+                font-size: 14px; 
+                padding: 8px 12px; 
+            }
+            .container { grid-template-columns: 1fr; } 
+        }
+    </style>
+</head>
+<body>
+
+<!-- ✅ แก้ข้อความเมนูให้ตรงกับรูปตัวอย่าง -->
+<nav class="top-nav">
+    <div class="brand-mark">
+        <span class="brand-icon"></span>
+        บ้านของชำ
+    </div>
+    <div class="nav-links">
+        <a class="nav-link" href="stock.html">📋 สต็อกสินค้า</a>
+        <a class="nav-link" href="project.html">🛍️ หมวดหมู่</a>
+        <a class="nav-link active" href="money.html">💵 คิดเงิน</a>
+        <a class="nav-link" href="account.html">👤 ข้อมูลร้าน</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div>
+        <div class="card">
+            <h3>🛒 ตะกร้าคิดเงิน</h3>
+            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px;">
+                <div class="form-group">
+                    <label>เลือกสินค้า (พิมพ์ค้นหาได้)</label>
+                    <input list="productList" id="pSel" placeholder="พิมพ์ชื่อสินค้า หรือเลือกจากรายการ" 
+                           oninput="autoFillPriceAndStock()" 
+                           onchange="autoFillPriceAndStock()"
+                           onkeydown="if(event.key==='Enter') { event.preventDefault(); document.getElementById('pPrice').focus(); }">
+                    <datalist id="productList"></datalist>
+                </div>
+                <div class="form-group"><label>ราคาขาย</label><input type="number" id="pPrice" placeholder="0" onkeydown="if(event.key==='Enter') { event.preventDefault(); document.getElementById('pQty').focus(); document.getElementById('pQty').select(); }"></div>
+                <div class="form-group"><label>จำนวน (<span id="pMax" style="color:#9b7aa8;font-weight:bold">0</span>)</label><input type="number" id="pQty" value="1" onkeydown="if(event.key==='Enter') { event.preventDefault(); addCart(); }"></div>
+            </div>
+            <button onclick="addCart()" style="width: 100%; margin-top: 10px;">➕ เพิ่มลงตะกร้า</button>
+            <table>
+                <thead><tr><th>สินค้า</th><th>ราคา</th><th>จำนวน</th><th>รวม</th><th>ลบ</th></tr></thead>
+                <tbody id="cartBody"></tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h3>💸 บันทึกรายจ่าย</h3>
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px;">
+                <input type="text" id="expName" placeholder="ค่าไฟ, ค่าน้ำแข็ง" onkeydown="if(event.key==='Enter') { event.preventDefault(); document.getElementById('expAmt').focus(); }">
+                <input type="number" id="expAmt" placeholder="0" onkeydown="if(event.key==='Enter') { event.preventDefault(); addExp(); }">
+            </div>
+            <button onclick="addExp()" style="width:100%; margin-top:10px; background:#f0b7c8; box-shadow:0 4px 0 #d9a3b8; margin-bottom: 15px;">📉 บันทึกรายจ่าย</button>
+            
+            <div style="font-size:13px; text-align:center; background:#f8f9fa; padding:10px; border-radius:12px; border: 1px solid #e1e8ef; line-height: 1.6;">
+                <strong>📅 รายรับ-รายจ่ายวันนี้ (<span id="currentDateText"></span>)</strong><br>
+                💰 รายรับ (ยอดขาย): <span id="sumInc" style="color:#9b7aa8;font-weight:bold">0.00</span> | 🧾 รายจ่ายร้าน: <span id="sumExp" style="color:#c98aa6;font-weight:bold">0.00</span><br>
+                ✨ กำไรสุทธิวันนี้: <span id="sumNet" style="font-weight:bold">0.00</span> ฿
+                
+                <button onclick="resetAllData()" style="width:100%; margin-top:10px; background:#ff4757; box-shadow:0 4px 0 #cc2936; padding:6px; font-size:13px; border-radius:8px; color: white;">🧹 ล้างข้อมูลทั้งหมดในระบบ</button>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="card">
+            <h3>💵 สรุปยอดเงิน</h3>
+            <div class="flex-between" style="font-size:16px;"><span>รวมทั้งสิ้น:</span><strong style="color:#9b7aa8;font-size:20px;"><span id="subTotal">0.00</span> ฿</strong></div>
+            <div class="form-group" style="margin: 10px 0;"><label>รับเงินมา:</label><input type="number" id="cashIn" placeholder="0" style="font-size:18px; text-align:right;" onkeyup="calChange()" onkeydown="if(event.key==='Enter') { event.preventDefault(); checkout(); }"></div>
+            <div class="flex-between" style="background:#fff0f7; padding:10px; border-radius:12px; border:1px solid #f1c4da;">
+                <span style="font-weight:bold; color:#9b7aa8">เงินทอน:</span><strong style="color:#9b7aa8; font-size:20px;"><span id="changeAmt">0.00</span> ฿</strong>
+            </div>
+            <button onclick="checkout()" style="width:100%; margin-top:10px; background:#c9b8ef; box-shadow:0 4px 0 #a99ada;">🛒 คิดเงินสำเร็จ</button>
+        </div>
+
+        <div class="card" style="padding: 10px;">
+            <h3>📄 ใบเสร็จปัจจุบัน</h3>
+            <div id="receiptWrapper" style="padding: 5px; background: white;">
+                <div class="receipt" id="bill">
+                    <div style="text-align:center;"><strong>บ้านของชำ 💕</strong><br>
+                        <small id="bId" style="color:#e78ab8; font-weight:bold; display:block; margin:2px 0;">เลขที่ใบเสร็จ: REC-XXXXXXXX-XXX</small>
+                        <small id="bTime" style="color:#777">--/--/-- --:--</small>
+                    </div>
+                    <hr style="border-top:2px dashed #eee; margin:10px 0;">
+                    <div id="bItems"><div style="text-align:center; color:#ccc;">ยังไม่มีการขาย</div></div>
+                    <hr style="border-top:2px dashed #eee; margin:10px 0;">
+                    <div class="flex-between"><span>ยอดสุทธิ:</span><span id="bNet" style="font-weight:bold">0.00</span></div>
+                    <div class="flex-between"><span>รับเงิน:</span><span id="bCash">0.00</span></div>
+                    <div class="flex-between" style="color:#9b7aa8; font-weight:bold"><span>เงินทอน:</span><span id="bChange">0.00</span></div>
+                </div>
+            </div>
+            <button onclick="saveSlip()" style="width:100%; margin-top:10px; background:#b8deda; box-shadow:0 4px 0 #91c7c2;">💾 บันทึกรูปสลิปนี้</button>
+        </div>
+    </div>
+</div>
+
+<div class="container" style="margin-top: 5px;">
+    <div style="grid-column: 1 / -1;">
+        <div class="card">
+            <h3>🗂️ คลังเก็บใบเสร็จย้อนหลัง</h3>
+            <div style="max-height: 250px; overflow-y: auto;">
+                <table style="margin-top: 0;">
+                    <thead>
+                        <tr>
+                            <th>เวลา</th>
+                            <th>เลขที่ใบเสร็จ</th>
+                            <th>ยอดขายสุทธิ</th>
+                            <th>การจัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyBody">
+                        <tr><td colspan="4" style="text-align:center; color:#ccc; padding:20px;">ยังไม่มีประวัติใบเสร็จในระบบ</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ ส่วนใหม่: ตารางรายรับ-รายจ่ายทั้งหมด -->
+<div class="container" style="margin-top: 5px;">
+    <div style="grid-column: 1 / -1;">
+        <div class="card">
+            <h3>📊 สรุปรายรับ-รายจ่ายทั้งหมด</h3>
+            <div style="max-height: 300px; overflow-y: auto;">
+                <table class="acc-table">
+                    <thead>
+                        <tr>
+                            <th>วันที่</th>
+                            <th>รายรับทั้งหมด (฿)</th>
+                            <th>รายจ่ายทั้งหมด (฿)</th>
+                            <th>กำไร/ขาดทุนสุทธิ (฿)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accTableBody">
+                        <tr><td colspan="4" style="text-align:center; color:#ccc; padding:20px;">ยังไม่มีข้อมูลรายรับ-รายจ่าย</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const dummyProducts = [
+        { id: "1710000000001", name: "🍰 เค้กสตรอว์เบอร์รี่ครีมสด", price: 85, qty: 3, category: "เบเกอรี่" },
+        { id: "1710000000002", name: "🥞 แพนเค้กซูเฟล่นุ่มนิ่ม", price: 120, qty: 5, category: "เบเกอรี่" },
+        { id: "1710000000003", name: "🧋 ชานมไข่มุกบราวน์ชูการ์", price: 55, qty: 10, category: "เครื่องดื่ม" },
+        { id: "1710000000004", name: "🍧 บิงซูบัวลอยซอสไข่เค็ม", price: 139, qty: 4, category: "ของหวาน" },
+        { id: "1710000000005", name: "🍪 ซอฟต์คุกกี้พรีเมียม", price: 45, qty: 8, category: "ของกินเล่น" },
+        { id: "1710000000006", name: "มะหมี่กึ่งสำเร็จรูป มาม่า", price: 12, qty: 23, category: "อาหารแห้ง" }
+    ];
+
+    if (!localStorage.getItem('advancedShopStock') || JSON.parse(localStorage.getItem('advancedShopStock')).length === 0) {
+        localStorage.setItem('advancedShopStock', JSON.stringify(dummyProducts));
+    }
+
+    let stock = JSON.parse(localStorage.getItem('advancedShopStock')) || [];
+    let cart = [], acc = JSON.parse(localStorage.getItem('shopAccDaily')) || {};
+    let receiptHistory = JSON.parse(localStorage.getItem('shopReceiptHistory')) || [];
+    const todayStr = new Date().toLocaleDateString('th-TH');
+
+    if (!acc[todayStr]) acc[todayStr] = { inc: 0, exp: 0 };
+
+    window.onload = () => { 
+        document.getElementById('currentDateText').innerText = todayStr;
+        loadDrop(); 
+        updateAcc(); 
+        renderHistory();
+        renderAccTable();
+    };
+
+    // ✅ เก็บข้อความที่แสดงในรายการไว้เทียบตรงๆ
+    let displayNames = {};
+
+    function loadDrop() {
+        const list = document.getElementById('productList');
+        list.innerHTML = '';
+        displayNames = {}; // รีเซ็ต
+        stock.forEach(i => { 
+            if(i.qty > 0) {
+                const displayText = `${i.name} (${i.qty})`;
+                const opt = document.createElement('option');
+                opt.value = displayText;
+                list.appendChild(opt);
+                // ✅ จับคู่: ข้อความที่แสดง -> สินค้า
+                displayNames[displayText] = i;
+            }
+        });
+    }
+
+    // ✅ เปลี่ยนเป็นเทียบข้อความที่แสดงเลย ไม่ต้องตัดอะไร
+    function autoFillPriceAndStock() {
+        const inputVal = document.getElementById('pSel').value.trim();
+        if (!inputVal) {
+            document.getElementById('pMax').innerText = 0;
+            document.getElementById('pPrice').value = '';
+            return;
+        }
+
+        // ✅ ค้นหาจากข้อความที่แสดงในรายการเลย
+        const foundItem = displayNames[inputVal];
+        
+        if (foundItem) {
+            document.getElementById('pMax').innerText = foundItem.qty;
+            document.getElementById('pPrice').value = foundItem.price; // ✅ ใส่ราคาทันที
+        } else {
+            document.getElementById('pMax').innerText = 0;
+            document.getElementById('pPrice').value = '';
+        }
+    }
+
+    function addCart() {
+        const inputVal = document.getElementById('pSel').value;
+        const prc = parseFloat(document.getElementById('pPrice').value), qty = parseInt(document.getElementById('pQty').value);
+        
+        const item = displayNames[inputVal];
+        
+        if(!item || isNaN(prc) || prc <= 0 || isNaN(qty) || qty <= 0) return alert('กรอกข้อมูลให้ถูกต้องจ้า');
+        const cItem = cart.find(c => c.id == item.id);
+        
+        if(qty + (cItem ? cItem.qty : 0) > item.qty) return alert('สินค้าในสต็อกไม่พอขายจ้า');
+        
+        if(cItem) { 
+            cItem.qty += qty; 
+            cItem.prc = prc; 
+        } else { 
+            cart.push({ id: item.id, name: item.name, prc, qty }); 
+        }
+        
+        renderCart(); 
+        document.getElementById('pSel').value = ''; 
+        document.getElementById('pPrice').value = ''; 
+        document.getElementById('pQty').value = 1; 
+        document.getElementById('cashIn').focus();
+    }
+
+    function renderCart() {
+        const body = document.getElementById('cartBody'); body.innerHTML = ''; let total = 0;
+        cart.forEach((c, idx) => {
+            total += c.prc * c.qty;
+            body.innerHTML += `<tr><td>${c.name}</td><td>${c.prc}</td><td>${c.qty}</td><td style="color:#9b7aa8;font-weight:bold">${c.prc*c.qty}</td><td><button onclick="cart.splice(${idx},1);renderCart();" style="padding:2px 6px; background:#f0a8ba; box-shadow:0 2px 0 #d989a0;">❌</button></td></tr>`;
+        });
+        document.getElementById('subTotal').innerText = total.toFixed(2); calChange();
+    }
+
+    function calChange() {
+        const tot = parseFloat(document.getElementById('subTotal').innerText), cash = parseFloat(document.getElementById('cashIn').value) || 0;
+        document.getElementById('changeAmt').innerText = (cash >= tot && cash > 0) ? (cash - tot).toFixed(2) : '0.00';
+    }
+
+    function generateReceiptId() {
+        const now = new Date();
+        const yyyy = now.getFullYear();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const count = receiptHistory.length + 1;
+        const subId = String(count).padStart(3, '0');
+        return `REC-${yyyy}${mm}${dd}-${subId}`;
+    }
+
+    function checkout() {
+        const tot = parseFloat(document.getElementById('subTotal').innerText), cash = parseFloat(document.getElementById('cashIn').value) || 0;
+        if(!cart.length || cash < tot) return alert('ตรวจสอบเงินที่รับมาอีกครั้งน้า 💸');
+        
+        cart.forEach(c => { const s = stock.find(i => i.id == c.id); if(s) s.qty -= c.qty; });
+        localStorage.setItem('advancedShopStock', JSON.stringify(stock));
+        
+        acc[todayStr].inc += tot; 
+        localStorage.setItem('shopAccDaily', JSON.stringify(acc));
+        
+        const receiptId = generateReceiptId();
+        const timeStr = new Date().toLocaleString('th-TH');
+        
+        const newReceipt = {
+            id: receiptId,
+            time: timeStr,
+            items: [...cart],
+            total: tot,
+            cash: cash,
+            change: cash - tot
+        };
+        receiptHistory.unshift(newReceipt);
+        localStorage.setItem('shopReceiptHistory', JSON.stringify(receiptHistory));
+
+        document.getElementById('bId').innerText = `เลขที่ใบเสร็จ: ${receiptId}`;
+        document.getElementById('bTime').innerText = timeStr;
+        const bItems = document.getElementById('bItems'); bItems.innerHTML = '';
+        cart.forEach(c => bItems.innerHTML += `<div class="flex-between"><span>${c.name} (x${c.qty})</span><span>${(c.prc*c.qty).toFixed(2)}</span></div>`);
+        document.getElementById('bNet').innerText = tot.toFixed(2); document.getElementById('bCash').innerText = cash.toFixed(2); document.getElementById('bChange').innerText = (cash - tot).toFixed(2);
+        
+        cart = []; renderCart(); loadDrop(); updateAcc(); renderHistory(); renderAccTable();
+        document.getElementById('cashIn').value = ''; document.getElementById('changeAmt').innerText = '0.00'; alert('🎉 คิดเงินสำเร็จแล้วจ้า!'); document.getElementById('pSel').focus();
+    }
+
+    function renderHistory() {
+        const tbody = document.getElementById('historyBody');
+        if (receiptHistory.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#ccc; padding:20px;">ยังไม่มีประวัติใบเสร็จในระบบ</td></tr>`;
+            return;
+        }
+        tbody.innerHTML = '';
+        receiptHistory.forEach((r, idx) => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${r.time.split(' ')[1] || r.time}</td>
+                    <td style="font-weight:600; color:#9b7aa8;">${r.id}</td>
+                    <td><strong>${r.total.toFixed(2)} ฿</strong></td>
+                    <td>
+                        <button class="btn-sm btn-view" onclick="viewHistoryReceipt(${idx})">👁️ เปิดดู</button>
+                        <button class="btn-sm btn-dl" onclick="downloadHistoryReceipt(${idx})">💾 ดาวน์โหลด</button>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+
+    function viewHistoryReceipt(idx) {
+        const r = receiptHistory[idx];
+        if(!r) return;
+        document.getElementById('bId').innerText = `เลขที่ใบเสร็จ: ${r.id}`;
+        document.getElementById('bTime').innerText = r.time;
+        const bItems = document.getElementById('bItems'); bItems.innerHTML = '';
+        r.items.forEach(c => bItems.innerHTML += `<div class="flex-between"><span>${c.name} (x${c.qty})</span><span>${(c.prc*c.qty).toFixed(2)}</span></div>`);
+        document.getElementById('bNet').innerText = r.total.toFixed(2); document.getElementById('bCash').innerText = r.cash.toFixed(2); document.getElementById('bChange').innerText = r.change.toFixed(2);
+        alert(`ดึงใบเสร็จ ${r.id} ขึ้นมาแสดงที่กล่องใบเสร็จปัจจุบันแล้วจ้า!`);
+    }
+
+    function downloadHistoryReceipt(idx) {
+        viewHistoryReceipt(idx);
+        setTimeout(() => {
+            saveSlipWithTitle(receiptHistory[idx].id);
+        }, 300);
+    }
+
+    function addExp() {
+        const name = document.getElementById('expName').value.trim(), amt = parseFloat(document.getElementById('expAmt').value);
+        if(!name || isNaN(amt) || amt <= 0) return alert('กรอกข้อมูลรายจ่ายให้ถูกต้องน้า');
+        acc[todayStr].exp += amt; 
+        localStorage.setItem('shopAccDaily', JSON.stringify(acc));
+        updateAcc(); 
+        renderAccTable();
+        document.getElementById('expName').value = ''; document.getElementById('expAmt').value = ''; alert('📉 บันทึกรายจ่ายแล้วจ้า');
+    }
+
+    function updateAcc() {
+        const currentData = acc[todayStr] || { inc: 0, exp: 0 };
+        const net = currentData.inc - currentData.exp;
+        document.getElementById('sumInc').innerText = currentData.inc.toFixed(2);
+        document.getElementById('sumExp').innerText = currentData.exp.toFixed(2);
+        const netEl = document.getElementById('sumNet'); netEl.innerText = net.toFixed(2);
+        netEl.style.color = net >= 0 ? '#9b7aa8' : '#c98aa6';
+    }
+
+    function renderAccTable() {
+        const tbody = document.getElementById('accTableBody');
+        const dates = Object.keys(acc).sort((a,b) => new Date(b) - new Date(a));
+
+        if (dates.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#ccc; padding:20px;">ยังไม่มีข้อมูลรายรับ-รายจ่าย</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = '';
+        dates.forEach(date => {
+            const data = acc[date];
+            const net = data.inc - data.exp;
+            const netClass = net >= 0 ? 'profit-positive' : 'profit-negative';
+            tbody.innerHTML += `
+                <tr>
+                    <td>${date}</td>
+                    <td>${data.inc.toFixed(2)}</td>
+                    <td>${data.exp.toFixed(2)}</td>
+                    <td class="${netClass}">${net.toFixed(2)}</td>
+                </tr>
+            `;
+        });
+    }
+
+    function saveSlip() {
+        if(document.getElementById('bNet').innerText === '0.00') return alert('ยังไม่มีข้อมูลการขายในสลิปจ้า');
+        const currentIdText = document.getElementById('bId').innerText.replace('เลขที่ใบเสร็จ: ', '');
+        saveSlipWithTitle(currentIdText);
+    }
+
+    function saveSlipWithTitle(fileName) {
+        const element = document.getElementById('receiptWrapper');
+        html2canvas(element, { scale: 2 }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `${fileName}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    }
+
+    function resetAllData() {
+        if (confirm('คุณแน่ใจใช่ไหมว่าต้องการล้างข้อมูลทั้งหมด? (ข้อมูลสต็อก ประวัติใบเสร็จ และรายรับรายจ่ายจะถูกลบออกทั้งหมดเลยน้า)')) {
+            localStorage.removeItem('advancedShopStock');
+            localStorage.removeItem('shopAccDaily');
+            localStorage.removeItem('shopReceiptHistory');
+            
+            stock = []; cart = []; acc = {}; receiptHistory = [];
+            acc[todayStr] = { inc: 0, exp: 0 };
+            
+            renderCart(); loadDrop(); updateAcc(); renderHistory(); renderAccTable();
+            
+            document.getElementById('bId').innerText = 'เลขที่ใบเสร็จ: REC-XXXXXXXX-XXX';
+            document.getElementById('bTime').innerText = '--/--/-- --:--';
+            document.getElementById('bItems').innerHTML = '<div style="text-align:center; color:#ccc;">ยังไม่มีการขาย</div>';
+            document.getElementById('bNet').innerText = '0.00';
+            document.getElementById('bCash').innerText = '0.00';
+            document.getElementById('bChange').innerText = '0.00';
+            
+            alert('🧹 ล้างข้อมูลระบบเรียบร้อยแล้วจ้า!');
+        }
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบสต็อกร้านชำ - 3D อัจฉริยะ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-page: #fff8fb; --white: #ffffff; --text-main: #554858; --text-sub: #928398;
+            --shadow-out: 8px 8px 20px #d1d9e6, -8px -8px 20px #ffffff;
+            --shadow-in: inset 3px 3px 8px #d1d9e6, inset -3px -3px 8px #ffffff;
+            --shadow-btn: 0 5px 0 #d47bab, 3px 8px 15px rgba(231,138,184,0.24);
+        }
+        * { font-family: 'Noto Sans Thai', system-ui, sans-serif; box-sizing: border-box; }
+        body { background: var(--bg-page); margin: 0; padding: 0 25px 25px; color: var(--text-main); }
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        /* ✅ แก้แค่ส่วนนี้: แถบเมนูให้ตรงกับรูปแบบที่ต้องการ */
+        .top-nav { 
+            max-width: 100%;
+            margin: 0 auto 22px; 
+            padding: 12px 25px; 
+            border-radius: 0 0 28px 28px; 
+            background: #ffffff; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            gap: 20px; 
+            flex-wrap: wrap; 
+            position: sticky; 
+            top: 0; 
+            z-index: 999; 
+        }
+        .brand-mark { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            font-weight: 800; 
+            color: #9b7aa8; 
+            font-size: 18px; 
+        }
+        .brand-icon { 
+            width: 48px; 
+            height: 48px; 
+            border-radius: 16px; 
+            background: #f3e5f5; 
+            display: grid; 
+            place-items: center; 
+            overflow: hidden;
+            background-image: url('https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-hoysfVCXwcawKj1Kr7C6goZVRR1sP9.png&w=1000&q=75'); 
+            background-size: cover; 
+            background-position: center; 
+        }
+        .brand-icon::before { content: ""; display: none; }
+        .brand-icon::after { content: ""; display: none; }
+        .logo-letter { position: relative; z-index: 1; margin-top: 15px; margin-left: 7px; color: #9b7aa8; font-size: 10px; font-weight: 900; letter-spacing: 0; display: none; }
+        .brand-text small { display: block; color: var(--text-sub); font-size: 12px; font-weight: 600; margin-top: -2px; }
+        .nav-links { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            flex-wrap: wrap; 
+        }
+        .nav-link { 
+            color: #928398; 
+            text-decoration: none; 
+            font-weight: 600; 
+            font-size: 15px; 
+            padding: 10px 16px; 
+            border-radius: 20px; 
+            transition: all 0.2s ease; 
+        }
+        .nav-link:hover { 
+            background: #f9f2f7; 
+            color: #9b7aa8; 
+        }
+        /* ✅ แก้แค่ส่วนนี้: สีปุ่มเมื่ออยู่หน้าปัจจุบัน */
+        .nav-link.active { 
+            background: #e78ab8; 
+            color: #ffffff; 
+            box-shadow: 0 2px 8px rgba(231,138,184,0.3); 
+        }
+        
+        .header-banner { background: var(--white); text-align: center; padding: 35px; border-radius: 30px; margin-bottom: 25px; box-shadow: var(--shadow-out); border: 1px solid rgba(255,255,255,0.7); position: relative; }
+        .header-banner h1 { margin: 0; font-size: 30px; color: #9b7aa8; }
+        .header-banner p { margin: 8px 0 0; font-size: 15px; color: var(--text-sub); }
+        .btn-reset-stock { position: absolute; top: 15px; right: 20px; background: #fce8f0; color: #b85c86; border: 1px solid #f9d2e2; padding: 6px 12px; border-radius: 12px; font-size: 11px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+        .btn-reset-stock:hover { background: #e78ab8; color: #ffffff; }
+        
+        .alert-zone { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px; }
+        .alert-box { padding: 18px 22px; border-radius: 22px; display: none; box-shadow: var(--shadow-out); border: 2px solid; }
+        .alert-danger { background: #ffebeb; color: #b83b3b; border-color: #ffb5b5; }
+        .alert-warning { background: #fffde6; color: #a17700; border-color: #ffeeba; }
+        .alert-box h3 { margin: 0 0 8px 0; font-size: 16px; display: flex; align-items: center; gap: 8px;}
+        .alert-box ul { margin: 0; padding-left: 20px; font-size: 14px; font-weight: bold;}
+
+        .form-card { background: var(--white); padding: 30px; border-radius: 30px; margin-bottom: 35px; box-shadow: var(--shadow-out); border: 1px solid rgba(255,255,255,0.7); }
+        .form-card h2 { margin-top: 0; color: #9b7aa8; font-size: 19px; margin-bottom: 20px;}
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; }
+        .form-group { display: flex; flex-direction: column; }
+        label { font-weight: bold; margin-bottom: 8px; color: var(--text-sub); font-size: 14px; }
+        input, select { padding: 13px; border: 1px solid #e2e9f3; border-radius: 16px; font-size: 15px; background: #fcfdfe; color: var(--text-main); outline: none; box-shadow: var(--shadow-in); transition: all 0.2s; }
+        input:focus, select:focus { border-color: #d9a3c9; background: var(--white); box-shadow: 0 0 8px rgba(217,163,201,0.22); }
+
+        .btn-submit { grid-column: 1 / -1; background: #e78ab8; color: #4f3345; border: none; padding: 15px; border-radius: 16px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: var(--shadow-btn); transition: transform 0.1s, box-shadow 0.1s; }
+        .btn-submit:active { transform: translateY(5px); box-shadow: 0 0px 0 #d9a3c9, 0 3px 6px rgba(0,0,0,0.1); }
+        .btn-edit-mode { background: #c9b8ef !important; box-shadow: 0 5px 0 #a99ada, 3px 8px 15px rgba(201,184,239,0.35) !important; }
+
+        .category-dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 25px; align-items: start; }
+        .category-column { background: var(--white); border-radius: 25px; padding: 22px; box-shadow: var(--shadow-out); border-bottom: 4px solid rgba(0,0,0,0.03); height: auto; }
+        
+        .category-column[data-cat="dry"] { border-top: 12px solid #fff6bd; }
+        .category-column[data-cat="drink"] { border-top: 12px solid #94d2e8; }
+        .category-column[data-cat="fresh"] { border-top: 12px solid #e78ab8; }
+        .category-column[data-cat="home"] { border-top: 12px solid #c6e4d5; }
+        .category-column[data-cat="snack"] { border-top: 12px solid #ffcb85; }
+        .category-column[data-cat="med"] { border-top: 12px solid #d7bfdc; }
+
+        .category-title { font-size: 17px; font-weight: bold; margin: 0 0 18px 0; padding-bottom: 12px; border-bottom: 2px dashed #e2e9f3; display: flex; justify-content: space-between; align-items: center; }
+        .item-count { font-size: 12px; background: #fff8fb; padding: 4px 12px; border-radius: 20px; color: var(--text-sub); box-shadow: var(--shadow-in); font-weight: bold; }
+        .items-container { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+
+        .product-card { background: #ffffff; border-radius: 18px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; box-shadow: 4px 4px 10px rgba(163,177,198,0.2); border: 1px solid rgba(255,255,255,0.7); }
+        .prod-left { display: flex; align-items: center; gap: 12px; min-width: 0; flex: 1; }
+        
+        .prod-img { 
+            width: 54px; 
+            height: 54px; 
+            border-radius: 14px; 
+            object-fit: cover; 
+            object-position: center;
+            flex: 0 0 54px; 
+            border: 2px solid #f1e3ef; 
+            background: #fff8fb; 
+        }
+        
+        .prod-details { min-width: 0; flex: 1; }
+        .prod-details h4 { margin: 0 0 6px 0; font-size: 16px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .exp-indicator { font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 8px; display: inline-block; }
+        .status-ok { background: #eef7ee; color: #3e6b48; }
+        .status-warn { background: #fff9db; color: #a17700; }
+        .status-dead { background: #ffebeb; color: #b83b3b; animation: soft-flash 2s infinite; }
+        @keyframes soft-flash { 50% { opacity: 0.6; } }
+
+        .prod-right { text-align: right; flex-shrink: 0; }
+        .prod-qty { font-size: 14px; font-weight: bold; background: #eedfd3; padding: 3px 12px; border-radius: 10px; display: inline-block; margin-bottom: 6px; box-shadow: var(--shadow-in); color: #7a5343; }
+        .action-btns { display: flex; gap: 6px; justify-content: flex-end; }
+        .btn-action { background: var(--white); padding: 5px 12px; border-radius: 9px; cursor: pointer; font-size: 11px; font-weight: bold; border: 1px solid #f0f3f8; }
+        .btn-edit:hover { background: #eef7ee; } .btn-delete:hover { background: #ffebeb; }
+
+        .empty-text { text-align: center; color: #ccc2b6; font-style: italic; padding: 15px 0; font-size: 14px; }
+        @media (max-width: 768px) { 
+            .top-nav { 
+                padding: 10px 15px; 
+                flex-direction: column; 
+                align-items: flex-start; 
+            } 
+            .nav-links { 
+                width: 100%; 
+                justify-content: flex-start; 
+                margin-top: 8px; 
+            } 
+            .nav-link { 
+                font-size: 14px; 
+                padding: 8px 12px; 
+            }
+            .alert-zone, .category-dashboard { grid-template-columns: 1fr; } 
+            .btn-reset-stock { position: static; margin-top: 10px; display: inline-block; } 
+        }
+    </style>
+</head>
+<body>
+
+<!-- ✅ แก้ข้อความเมนูให้ตรงกับรูปตัวอย่าง และตั้งค่าหน้าปัจจุบันเป็น active -->
+<nav class="top-nav">
+    <div class="brand-mark">
+        <span class="brand-icon"></span>
+        <span class="brand-text">บ้านของชำ</span>
+    </div>
+    <div class="nav-links">
+        <a class="nav-link" href="stock.html">📋 สต็อกสินค้า</a>
+        <a class="nav-link active" href="project.html">🛍️ หมวดหมู่</a>
+        <a class="nav-link" href="money.html">💵 คิดเงิน</a>
+        <a class="nav-link" href="account.html">👤 ข้อมูลร้าน</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="header-banner">
+        <button class="btn-reset-stock" onclick="resetToDefaultStock()">🔄 รีเซ็ตคลังสินค้าเริ่มต้น</button>
+        <h1>📦 คลังสินค้าคู่ใจ บ้านของชำ ✨</h1>
+        <p>จัดระเบียบสต็อกอัจฉริยะด้วยระบบวิเคราะห์หมวดหมู่อัตโนมัติ สวยงามสไตล์ 3D พรีเมียมพาสเทล</p>
+    </div>
+
+    <div class="alert-zone">
+        <div id="boxExpired" class="alert-box alert-danger"><h3>❌ สินค้าหมดอายุแล้ว</h3><ul id="expiredAlertList"></ul></div>
+        <div id="boxWarning" class="alert-box alert-warning"><h3>⚠️ สินค้าใกล้หมดอายุใน 7 วัน</h3><ul id="warningAlertList"></ul></div>
+    </div>
+
+    <div class="form-card">
+        <h2 id="formTitle">✨ เพิ่มสินค้าใหม่เข้าคลัง</h2>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>ชื่อสินค้า 📦</label>
+                <input type="text" id="pName" placeholder="เช่น มาม่า, นมกล่อง, เลย์, พารา" onkeyup="analyzeCategory(this.value)" onkeydown="if(event.key==='Enter') document.getElementById('pQty').focus()">
+            </div>
+            <div class="form-group">
+                <label>หมวดหมู่สินค้า 🏷️</label>
+                <select id="pCategory">
+                    <option value="dry">🌾 ของแห้ง / เครื่องปรุง</option>
+                    <option value="drink">🥤 เครื่องดื่ม / นม</option>
+                    <option value="fresh">🥩 ของสด / อาหารแช่แข็ง</option>
+                    <option value="home">🧼 ของใช้ในครัวเรือน</option>
+                    <option value="snack">🍪 ขนม / ของกินเล่น</option>
+                    <option value="med">💊 ยาสามัญ / สุขภาพ</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>จำนวนคงเหลือ (ชิ้น) 🔢</label>
+                <input type="number" id="pQty" min="0" placeholder="0" onkeydown="if(event.key==='Enter') document.getElementById('pExp').focus()">
+            </div>
+            <div class="form-group">
+                <label>วันหมดอายุบนฉลาก 📅</label>
+                <input type="date" id="pExp" onkeydown="if(event.key==='Enter') handleFormSubmit()">
+            </div>
+            <button class="btn-submit" id="btnSubmit" onclick="handleFormSubmit()">💖 บันทึกสินค้าเข้าหมวดหมู่</button>
+        </div>
+    </div>
+
+    <div class="category-dashboard">
+        <div class="category-column" data-cat="dry"><div class="category-title"><span>🌾 ของแห้ง / เครื่องปรุง</span><span class="item-count" id="count-dry">0 รายการ</span></div><div class="items-container" id="shelf-dry"></div></div>
+        <div class="category-column" data-cat="drink"><div class="category-title"><span>🥤 เครื่องดื่ม / นม</span><span class="item-count" id="count-drink">0 รายการ</span></div><div class="items-container" id="shelf-drink"></div></div>
+        <div class="category-column" data-cat="fresh"><div class="category-title"><span>🥩 ของสด / อาหารแช่แข็ง</span><span class="item-count" id="count-fresh">0 รายการ</span></div><div class="items-container" id="shelf-fresh"></div></div>
+        <div class="category-column" data-cat="home"><div class="category-title"><span>🧼 ของใช้ในครัวเรือน</span><span class="item-count" id="count-home">0 รายการ</span></div><div class="items-container" id="shelf-home"></div></div>
+        <div class="category-column" data-cat="snack"><div class="category-title"><span>🍪 ขนม / ของกินเล่น</span><span class="item-count" id="count-snack">0 รายการ</span></div><div class="items-container" id="shelf-snack"></div></div>
+        <div class="category-column" data-cat="med"><div class="category-title"><span>💊 ยาสามัญ / สุขภาพ</span><span class="item-count" id="count-med">0 รายการ</span></div><div class="items-container" id="shelf-med"></div></div>
+    </div>
+</div>
+
+<script>
+    const defaultShopStock = [
+        { id: 101, name: "บะหมี่กึ่งสำเร็จรูป มาม่า", category: "dry", qty: 24, exp: "2026-12-15", img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-YVYDh5ken27Co8yX09kdpYXh3ofeTb.png&w=1000&q=75" },
+        { id: 102, name: "ข้าวหอมมะลิถุงเล็ก", category: "dry", qty: 12, exp: "2027-01-20", img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-A9eIgv4xhD8XwN8vkvBYY10vCzwTzv.png&w=1000&q=75" },
+        { id: 103, name: "น้ำปลาแท้", category: "dry", qty: 18, exp: "2027-03-05", img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-jOrMowRxLengEwE8ojWKXVoZbStgkp.png&w=1000&q=75" },
+        
+        { id: 201, name: "นมสดพาสเจอร์ไรส์", category: "drink", qty: 10, exp: "2026-06-18", img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-F4jqbQsCy0pBaRzc71QYwUkrAkvZi6.png&w=1000&q=75" },
+        { id: 202, name: "น้ำดื่มขวดเล็ก", category: "drink", qty: 36, exp: "2027-02-10", img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-bmzLfyohXRZfMKDJgxQZocCGuZP9sC.png&w=1000&q=75" },
+        { id: 203, name: "โค้กกระป๋อง", category: "drink", qty: 20, exp: "2026-11-10", img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-qbEZLL3VigCxLQqH3P7QOv9uIt2IgQ.png&w=1000&q=75" },
+        
+        { id: 301, name: "เนื้อหมู", category: "fresh", qty: 15, exp: "2026-06-12", img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-bjTbReUbMZPhSuv5pHGOb7mo385h48.png&w=1000&q=75" },
+        { id: 302, name: "เนื้อไก่", category: "fresh", qty: 12, exp: "2026-06-14", img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-sIZsICFRGAPfrFWKM5QgISnhWxEknB.png&w=1000&q=75" },
+        { id: 306, name: "ไข่ไก่แพ็ก 10 ฟอง", category: "fresh", qty: 14, exp: "2026-07-01", img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-yf35vuDiJ4sYPcverfgWcCZZvjaDnc.png&w=1000&q=75" },
+        
+        { id: 401, name: "น้ำยาล้างจาน", category: "home", qty: 16, exp: "2027-06-01", img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-qvlZE5S9N1mbf2vsXj8KCfFx2V1dfA.png&w=1000&q=75" },
+        { id: 402, name: "สบู่ก้อน", category: "home", qty: 30, exp: "2027-04-15", img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-0EumVwFuSrcJSbTbqi6NGpq8ddFGKB.png&w=1000&q=75" },
+        { id: 403, name: "กระดาษทิชชู่", category: "home", qty: 18, exp: "2028-01-01", img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-RcxHkjUdGdFrHiaOfPUEwAIm6NeRC4.png&w=1000&q=75" },
+        
+        { id: 501, name: "มันฝรั่งทอดกรอบ เลย์", category: "snack", qty: 15, exp: "2026-09-20", img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-qQM0EOJFmJ5nW6ecSmRSNEyC67MhLx.png&w=1000&q=75" },
+        { id: 502, name: "คุกกี้กล่องเล็ก", category: "snack", qty: 22, exp: "2026-12-25", img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-zYmK8CwOnZSBNPiZ3lKE3jXLBrsi7g.png&w=1000&q=75" },
+        { id: 503, name: "ช็อกโกแลตแท่ง", category: "snack", qty: 19, exp: "2026-10-14", img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-7A67shmAxn3I6JFLINSfPdOc1q6LzB.png&w=1000&q=75" },
+        
+        { id: 601, name: "ยาพาราเซตามอล", category: "med", qty: 12, exp: "2027-02-20", img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-z1ggj8Abs6NsYbHDMVviQpUdzgFudR.png&w=1000&q=75" },
+        { id: 602, name: "พลาสเตอร์ปิดแผล", category: "med", qty: 25, exp: "2027-05-30", img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-7yiU0MjbaL2wmQUiRa7RaDh2aqYnog.png&w=1000&q=75" },
+        { id: 603, name: "แอลกอฮอล์ล้างแผล", category: "med", qty: 14, exp: "2027-08-12", img: "https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-AddCZZif2hlITBVkWKAeXZXYwii2lo.png&w=1000&q=75" }
+    ];
+
+    const categoryDefaultImages = {
+        dry: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?w=160&h=160&auto=format&fit=crop&q=80", 
+        drink: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=160&h=160&auto=format&fit=crop&q=80", 
+        fresh: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=160&h=160&auto=format&fit=crop&q=80", 
+        home: "https://images.unsplash.com/photo-1528740561666-bd247e66ae8f?w=160&h=160&auto=format&fit=crop&q=80", 
+        snack: "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=160&h=160&auto=format&fit=crop&q=80", 
+        med: "https://images.unsplash.com/photo-1607619275117-7d175d2e7022?w=160&h=160&auto=format&fit=crop&q=80" 
+    };
+
+    let shopStock = JSON.parse(localStorage.getItem('advancedShopStock'));
+    
+    if (!shopStock) {
+        shopStock = [...defaultShopStock];
+        localStorage.setItem('advancedShopStock', JSON.stringify(shopStock));
+    } else {
+        shopStock = shopStock.map(item => {
+            const defaultItem = defaultShopStock.find(d => d.id === item.id || d.name === item.name);
+            if (defaultItem) {
+                item.img = defaultItem.img; 
+            } else if (!item.img || item.img.includes('via.placeholder') || item.img.includes('dummyimage') || item.img.includes('photo-1542838132')) {
+                item.img = categoryDefaultImages[item.category] || "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=160&h=160&auto=format&fit=crop&q=80";
+            }
+            return item;
+        });
+        localStorage.setItem('advancedShopStock', JSON.stringify(shopStock));
+    }
+    
+    let editId = null;
+
+    function resetToDefaultStock() {
+        if (confirm('คุณแม่ค้าต้องการรีเซ็ตคลังสินค้าเป็นค่าเริ่มต้นใช่ไหมคะ? ข้อมูลที่เพิ่มเองก่อนหน้านี้จะหายไปน้า 🎀')) {
+            localStorage.removeItem('advancedShopStock');
+            shopStock = [...defaultShopStock];
+            refreshDashboard();
+        }
+    }
+
+    function analyzeCategory(text) {
+        if (!text || editId !== null) return;
+        const val = text.toLowerCase();
+        const keywords = {
+            dry: ['มาม่า', 'ไวไว', 'ยำยำ', 'กึ่ง', 'ข้าว', 'น้ำปลา', 'ซีอิ๊ว', 'ซอส', 'เกลือ', 'น้ำตาล', 'ผงชูรส', 'รสดี', 'น้ำมัน', 'วุ้นเส้น', 'เส้น', 'พริก', 'กะทิ'],
+            drink: ['นม', 'น้ำ', 'โค้ก', 'เป๊ป', 'แป๊ป', 'สไปรท์', 'โออิชิ', 'อิชิตัน', 'ชา', 'กาแฟ', 'เบียร์', 'เหล้า', 'โซดา', 'สปอนเซอร์', 'กระทิงแดง'],
+            fresh: ['หมู', 'ไก่', 'เนื้อ', 'ปลา', 'กุ้ง', 'หอย', 'ปู', 'ไข่', 'ผัก', 'ผลไม้', 'แช่แข็ง', 'ลูกชิ้น', 'ไส้กรอก', 'เต้าหู้'],
+            home: ['สบู่', 'แชมพู', 'ยาสระ', 'ครีมนวด', 'ยาสีฟัน', 'แปรง', 'ผงซักฟอก', 'ปรับผ้านุ่ม', 'ล้างจาน', 'ทิชชู่', 'ผ้าอนามัย', 'ยากันยุง', 'ถุงขยะ'],
+            snack: ['ขนม', 'เลย์', 'มันฝรั่ง', 'ป๊อกกี้', 'คุกกี้', 'ลูกอม', 'หมากฝรั่ง', 'ช็อกโกแลต', 'เวเฟอร์', 'เยลลี่', 'ถั่ว', 'ทาโร่', 'สาหร่าย', 'ปัง'],
+            med: ['ยา', 'พารา', 'แก้ไอ', 'แก้แพ้', 'พลาสเตอร์', 'ยาดม', 'ยาหม่อง', 'แมส', 'แอลกอฮอล์', 'สำลี', 'เบตาดีน']
+        };
+        for (const [cat, words] of Object.entries(keywords)) {
+            if (words.some(word => val.includes(word))) { document.getElementById('pCategory').value = cat; break; }
+        }
+    }
+
+    window.onload = () => refreshDashboard();
+
+    const resetForm = () => {
+        editId = null; document.getElementById('formTitle').innerText = "✨ เพิ่มสินค้าใหม่เข้าคลัง";
+        const btn = document.getElementById('btnSubmit'); btn.innerText = "💖 บันทึกสินค้าเข้าหมวดหมู่"; btn.classList.remove('btn-edit-mode');
+        ['pName', 'pQty', 'pExp'].forEach(id => document.getElementById(id).value = '');
+    };
+
+    function handleFormSubmit() {
+        const name = document.getElementById('pName').value.trim(), category = document.getElementById('pCategory').value;
+        const qty = parseInt(document.getElementById('pQty').value), exp = document.getElementById('pExp').value;
+        if (!name || isNaN(qty) || !exp) { alert('คุณแม่ค้าจ๋า รบกวนกรอกข้อมูลสินค้าให้ครบถ้วนก่อนนะจ๊ะ 🎀'); return; }
+
+        if (editId === null) {
+            const chosenImg = categoryDefaultImages[category] || "https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=160&h=160&auto=format&fit=crop&q=80";
+            shopStock.push({ 
+                id: Date.now(), 
+                name, 
+                category, 
+                qty, 
+                exp, 
+                img: chosenImg
+            });
+        }
+        else { const item = shopStock.find(i => i.id === editId); if (item) Object.assign(item, { name, category, qty, exp }); resetForm(); }
+        localStorage.setItem('advancedShopStock', JSON.stringify(shopStock)); refreshDashboard();
+        
+        if (editId === null) {
+            ['pName', 'pQty', 'pExp'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('pName').focus();
+        }
+    }
+
+    function startEdit(id) {
+        const item = shopStock.find(i => i.id === id); if (!item) return;
+        document.getElementById('pName').value = item.name;
+        document.getElementById('pCategory').value = item.category;
+        document.getElementById('pQty').value = item.qty;
+        document.getElementById('pExp').value = item.exp;
+        editId = id; document.getElementById('formTitle').innerText = "✏️ กำลังแก้ไขสินค้า: " + item.name;
+        const btn = document.getElementById('btnSubmit'); btn.innerText = "💾 อัปเดตข้อมูลสินค้า"; btn.classList.add('btn-edit-mode');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function deleteProduct(id) {
+        if (confirm('ยืนยันว่าจะลบสินค้าชิ้นนี้ใช่ไหมจ๊ะ?')) { if (editId === id) resetForm(); shopStock = shopStock.filter(item => item.id !== id); localStorage.setItem('advancedShopStock', JSON.stringify(shopStock)); refreshDashboard(); }
+    }
+
+    function refreshDashboard() {
+        const cats = ['dry', 'drink', 'fresh', 'home', 'snack', 'med'], shelves = {};
+        cats.forEach(c => { shelves[c] = { el: document.getElementById(`shelf-${c}`), countEl: document.getElementById(`count-${c}`), count: 0 }; shelves[c].el.innerHTML = ''; });
+
+        let expired = [], warning = []; const today = new Date().setHours(0,0,0,0);
+        shopStock.sort((a, b) => new Date(a.exp) - new Date(b.exp)).forEach(item => {
+            if (!shelves[item.category]) return; shelves[item.category].count++;
+            const diffDays = Math.ceil((new Date(item.exp).setHours(0,0,0,0) - today) / (1000 * 60 * 60 * 24));
+            let cls = 'status-ok', txt = `⏳ อีก ${diffDays} วัน`;
+            if (diffDays < 0) { cls = 'status-dead'; txt = '❌ หมดอายุแล้ว'; expired.push(item.name); }
+            else if (diffDays <= 7) { cls = 'status-warn'; txt = `⚠️ อีก ${diffDays} วัน`; warning.push(`${item.name} (${diffDays} วัน)`); }
+
+            const card = document.createElement('div'); card.className = 'product-card';
+            card.innerHTML = `<div class="prod-left"><img class="prod-img" src="${item.img}" alt="${item.name}"><div class="prod-details"><h4>${item.name}</h4><span class="exp-indicator ${cls}">${txt} (หมด ${item.exp})</span></div></div>
+                <div class="prod-right"><div class="prod-qty">${item.qty} ชิ้น</div><div class="action-btns"><button class="btn-action btn-edit" onclick="startEdit(${item.id})">แก้ไข</button><button class="btn-action btn-delete" onclick="deleteProduct(${item.id})">ลบ</button></div></div>`;
+            shelves[item.category].el.appendChild(card);
+        });
+
+        cats.forEach(c => { shelves[c].countEl.innerText = `${shelves[c].count} รายการ`; if (shelves[c].count === 0) shelves[c].el.innerHTML = `<div class="empty-text">ยังไม่มีสินค้าในหมวดนี้จ้า</div>`; });
+        const updateBox = (id, arr, box) => { const el = document.getElementById(id); el.innerHTML = ''; box.style.display = arr.length ? 'block' : 'none'; arr.forEach(n => { const li = document.createElement('li'); li.innerText = n; el.appendChild(li); }); };
+        updateBox('expiredAlertList', expired, document.getElementById('boxExpired')); updateBox('warningAlertList', warning, document.getElementById('boxWarning'));
+    }
+</script>
+</body>
+</html>

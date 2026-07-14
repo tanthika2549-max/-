@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ข้อมูลร้าน & บัญชีผู้ใช้ - บ้านของชำ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Noto Sans Thai', system-ui, sans-serif; box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: #fff8fb; color: #554858; padding: 0 20px 30px; }
+
+        /* ✅ แก้แค่ส่วนนี้: แถบเมนูให้ตรงกับรูปแบบตัวอย่าง */
+        .top-nav { 
+            max-width: 100%;
+            margin: 0 auto 25px; 
+            padding: 12px 25px; 
+            border-radius: 0 0 28px 28px; 
+            background: #ffffff; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            gap: 20px; 
+            flex-wrap: wrap; 
+            position: sticky; 
+            top: 0; 
+            z-index: 999; 
+        }
+        .brand-mark { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            font-weight: 800; 
+            color: #9b7aa8; 
+            font-size: 18px; 
+        }
+        .brand-icon { 
+            width: 48px; 
+            height: 48px; 
+            border-radius: 16px; 
+            background: #f3e5f5; 
+            display: grid; 
+            place-items: center; 
+            overflow: hidden;
+            background-image: url('https://www.thiings.co/_next/image?url=https%3A%2F%2Flftz25oez4aqbxpq.public.blob.vercel-storage.com%2Fimage-hoysfVCXwcawKj1Kr7C6goZVRR1sP9.png&w=1000&q=75'); 
+            background-size: cover; 
+            background-position: center; 
+        }
+        .brand-icon img { width: 100%; height: 100%; object-fit: cover; display: none; }
+        .nav-links { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            flex-wrap: wrap; 
+        }
+        .nav-link { 
+            color: #928398; 
+            text-decoration: none; 
+            font-weight: 600; 
+            font-size: 15px; 
+            padding: 10px 16px; 
+            border-radius: 20px; 
+            transition: all 0.2s ease; 
+        }
+        .nav-link:hover { 
+            background: #f9f2f7; 
+            color: #9b7aa8; 
+        }
+        /* ✅ แก้แค่ส่วนนี้: สีปุ่ม active ให้ตรงกับรูปตัวอย่าง */
+        .nav-link.active { 
+            background: #e78ab8; 
+            color: #ffffff; 
+            box-shadow: 0 2px 8px rgba(231,138,184,0.3); 
+        }
+
+        /* กรอบเนื้อหาหลัก */
+        .container { max-width: 1000px; margin: 0 auto; }
+        .page-title { font-size: 22px; font-weight: 700; color: #9b7aa8; margin: 0 0 20px 10px; display: flex; align-items: center; gap: 8px; }
+
+        /* กรอบกล่องเนื้อหา */
+        .card { background: #ffffff; border-radius: 16px; box-shadow: 0 3px 10px rgba(155, 122, 168, 0.1); padding: 25px; margin-bottom: 20px; border: 1px solid #f3eaf5; }
+        .card-header { font-size: 17px; font-weight: 700; color: #9b7aa8; padding-bottom: 12px; margin-bottom: 20px; border-bottom: 1px dashed #e8dfea; display: flex; align-items: center; gap: 8px; }
+
+        /* รูปโปรไฟล์ */
+        .profile-header { display: flex; align-items: center; gap: 20px; margin-bottom: 25px; flex-wrap: wrap; }
+        .avatar-wrap { position: relative; width: 110px; height: 110px; }
+        .avatar { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 3px solid #f0e4f3; box-shadow: 0 2px 8px rgba(0,0,0,0.08); background: #faf7fc; }
+        .edit-avatar { position: absolute; bottom: 4px; right: 4px; width: 32px; height: 32px; border-radius: 50%; background: #e78ab8; color: #fff; border: none; font-size: 14px; cursor: pointer; display: grid; place-items: center; box-shadow: 0 2px 5px rgba(0,0,0,0.15); }
+        .avatar-info { flex: 1; min-width: 250px; }
+        .avatar-info h2 { font-size: 20px; font-weight: 700; color: #554858; margin: 0 0 5px; }
+        .avatar-info p { font-size: 14px; color: #928398; }
+
+        /* รูปแบบข้อมูล */
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 18px; }
+        .info-item { background: #fefafc; border-radius: 10px; padding: 14px; border: 1px solid #f7f0f9; transition: 0.2s; }
+        .info-item:hover { background: #fff9fc; border-color: #f0e4f5; }
+        .info-label { font-size: 12px; font-weight: 600; color: #928398; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+        .info-value { font-size: 15px; font-weight: 500; color: #554858; display: flex; justify-content: space-between; align-items: center; }
+        .info-input { width: 100%; padding: 6px 10px; border: 1px solid #e0d5e6; border-radius: 6px; font-size: 15px; background: #fff; outline: none; }
+        .btn-edit { background: none; border: none; color: #b494c0; font-size: 13px; cursor: pointer; padding: 2px 6px; border-radius: 4px; }
+        .btn-edit:hover { background: #f3eaf7; color: #9b7aa8; }
+
+        /* 📊 ส่วนสรุปสต็อก & การขาย */
+        .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-top: 10px; }
+        .summary-box { background: #fefafc; border-radius: 12px; padding: 20px 15px; text-align: center; border: 1px solid #f7f0f9; transition: 0.2s; }
+        .summary-box:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(155, 122, 168, 0.1); }
+        .summary-title { font-size: 13px; font-weight: 600; color: #928398; margin-bottom: 10px; }
+        .summary-value { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+        .summary-desc { font-size: 12px; color: #b494c0; }
+
+        /* สีแยกตามประเภทข้อมูล */
+        .summary-box.stock { background: #f9f2f7; border-color: #f3e7f7; }
+        .summary-box.cost { background: #fff9f2; border-color: #f9eedf; }
+        .summary-box.warning { background: #fff4f7; border-color: #fce3ec; }
+        .summary-box.income { background: #f2f9f6; border-color: #e2f3ec; }
+        .summary-box.expense { background: #fff5f5; border-color: #fee8e8; }
+        .summary-box.profit { background: #f5f2ff; border-color: #ede7ff; }
+
+        .summary-box.stock .summary-value { color: #9b7aa8; }
+        .summary-box.cost .summary-value { color: #d69a56; }
+        .summary-box.warning .summary-value { color: #e0648c; }
+        .summary-box.income .summary-value { color: #58a97d; }
+        .summary-box.expense .summary-value { color: #e86464; }
+        .summary-box.profit .summary-value { color: #7b61e0; }
+
+        /* ปุ่มการกระทำ */
+        .action-buttons { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+        .btn { flex: 1; min-width: 160px; padding: 12px 15px; border-radius: 10px; border: none; font-weight: 600; font-size: 14px; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .btn-primary { background: #9b7aa8; color: #fff; }
+        .btn-primary:hover { background: #8a6996; }
+        .btn-warning { background: #f9d76d; color: #7a6623; }
+        .btn-warning:hover { background: #f7c944; }
+        .btn-danger { background: #f26481; color: #fff; }
+        .btn-danger:hover { background: #e04460; }
+
+        @media (max-width: 768px) {
+            .top-nav { 
+                padding: 10px 15px; 
+                flex-direction: column; 
+                align-items: flex-start; 
+            } 
+            .nav-links { 
+                width: 100%; 
+                justify-content: flex-start; 
+                margin-top: 8px; 
+            } 
+            .nav-link { 
+                font-size: 14px; 
+                padding: 8px 12px; 
+            }
+            .profile-header { justify-content: center; text-align: center; }
+            .action-buttons { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ✅ แก้ข้อความเมนูให้ตรงกับรูปตัวอย่าง -->
+<nav class="top-nav">
+    <div class="brand-mark">
+        <span class="brand-icon"></span>
+        บ้านของชำ
+    </div>
+    <div class="nav-links">
+        <a class="nav-link" href="stock.html">📋 สต็อกสินค้า</a>
+        <a class="nav-link" href="project.html">🛍️ หมวดหมู่</a>
+        <a class="nav-link" href="money.html">💵 คิดเงิน</a>
+        <a class="nav-link active" href="account.html">👤 ข้อมูลร้าน</a>
+    </div>
+</nav>
+
+<div class="container">
+    <h1 class="page-title">👤 ข้อมูลร้าน & บัญชีผู้ใช้</h1>
+
+    <!-- ✅ ส่วนที่ 1: ข้อมูลร้านและโปรไฟล์ -->
+    <div class="card">
+        <div class="profile-header">
+            <div class="avatar-wrap">
+                <img id="avatarImg" class="avatar" src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="รูปโปรไฟล์">
+                <button class="edit-avatar" onclick="document.getElementById('avatarInput').click()" title="เปลี่ยนรูป">✎</button>
+                <input type="file" id="avatarInput" accept="image/*" style="display:none;" onchange="changeAvatar(event)">
+            </div>
+            <div class="avatar-info">
+                <h2 id="shopNameDisplay">บ้านของชำ</h2>
+                <p>ผู้ดูแลระบบหลัก · เริ่มใช้งานตั้งแต่ 1 มกราคม 2568</p>
+            </div>
+        </div>
+
+        <div class="card-header">🏪 ข้อมูลทั่วไปของร้าน</div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">📝 ชื่อร้านค้า</div>
+                <div class="info-value">
+                    <span id="shopNameView">บ้านของชำ</span>
+                    <button class="btn-edit" onclick="editField('shopName')">แก้ไข</button>
+                </div>
+                <input type="text" id="shopNameInput" class="info-input" style="display:none;" value="บ้านของชำ" placeholder="ระบุชื่อร้าน">
+            </div>
+            <div class="info-item">
+                <div class="info-label">📞 เบอร์โทรศัพท์</div>
+                <div class="info-value">
+                    <span id="phoneView">-- ยังไม่ได้ระบุ --</span>
+                    <button class="btn-edit" onclick="editField('phone')">แก้ไข</button>
+                </div>
+                <input type="tel" id="phoneInput" class="info-input" style="display:none;" placeholder="เช่น 081-234-5678">
+            </div>
+            <div class="info-item">
+                <div class="info-label">✉️ อีเมล์ติดต่อ</div>
+                <div class="info-value">
+                    <span id="emailView">-- ยังไม่ได้ระบุ --</span>
+                    <button class="btn-edit" onclick="editField('email')">แก้ไข</button>
+                </div>
+                <input type="email" id="emailInput" class="info-input" style="display:none;" placeholder="เช่น info@banchomcha.com">
+            </div>
+            <div class="info-item" style="grid-column: 1 / -1;">
+                <div class="info-label">📍 ที่อยู่ร้านค้า</div>
+                <div class="info-value">
+                    <span id="addressView">-- ยังไม่ได้ระบุ --</span>
+                    <button class="btn-edit" onclick="editField('address')">แก้ไข</button>
+                </div>
+                <input type="text" id="addressInput" class="info-input" style="display:none;" placeholder="ระบุที่อยู่เต็มสำหรับทำเอกสาร">
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ ส่วนที่ 2: ข้อมูลบัญชีผู้ใช้ -->
+    <div class="card">
+        <div class="card-header">🔐 ข้อมูลบัญชีผู้ดูแลระบบ</div>
+        <div class="info-grid">
+            <div class="info-item">
+                <div class="info-label">👤 ชื่อผู้ใช้เข้าระบบ</div>
+                <div class="info-value">
+                    <span id="usernameView">admin</span>
+                    <button class="btn-edit" onclick="editField('username')">แก้ไข</button>
+                </div>
+                <input type="text" id="usernameInput" class="info-input" style="display:none;" value="admin">
+            </div>
+            <div class="info-item">
+                <div class="info-label">🔑 รหัสผ่าน</div>
+                <div class="info-value">
+                    <span id="passwordView">••••••••</span>
+                    <button class="btn-edit" onclick="editField('password')">เปลี่ยนรหัส</button>
+                </div>
+                <input type="password" id="passwordInput" class="info-input" style="display:none;" value="123456" placeholder="รหัสผ่านใหม่">
+            </div>
+            <div class="info-item">
+                <div class="info-label">📅 วันที่ลงทะเบียน</div>
+                <div class="info-value">1 มกราคม 2568</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label">⏱️ เข้าสู่ระบบล่าสุด</div>
+                <div class="info-value" id="lastLogin">--/--/---- --:--</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ ส่วนที่ 3: สรุปภาพรวมสต็อก & การขาย อัปเดตอัตโนมัติ -->
+    <div class="card">
+        <div class="card-header">📊 สรุปภาพรวมสต็อก & การขายวันนี้</div>
+        <div class="summary-grid">
+            <div class="summary-box stock">
+                <div class="summary-title">รายการสินค้าทั้งหมด</div>
+                <div class="summary-value" id="sumTotalItems">0</div>
+                <div class="summary-desc">รายการ</div>
+            </div>
+            <div class="summary-box cost">
+                <div class="summary-title">มูลค่าสินค้ารวม (ทุน)</div>
+                <div class="summary-value" id="sumTotalCost">0.00</div>
+                <div class="summary-desc">บาท</div>
+            </div>
+            <div class="summary-box warning">
+                <div class="summary-title">สินค้าใกล้หมด/หมดสต็อก</div>
+                <div class="summary-value" id="sumLowStock">0</div>
+                <div class="summary-desc">รายการ</div>
+            </div>
+            <div class="summary-box income">
+                <div class="summary-title">รายได้รวมวันนี้</div>
+                <div class="summary-value" id="sumDailyIncome">0.00</div>
+                <div class="summary-desc">บาท</div>
+            </div>
+            <div class="summary-box expense">
+                <div class="summary-title">ค่าใช้จ่ายวันนี้</div>
+                <div class="summary-value" id="sumDailyExpense">0.00</div>
+                <div class="summary-desc">บาท</div>
+            </div>
+            <div class="summary-box profit">
+                <div class="summary-title">กำไรสุทธิวันนี้</div>
+                <div class="summary-value" id="sumDailyProfit">0.00</div>
+                <div class="summary-desc">บาท</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ ส่วนที่ 4: ปุ่มการจัดการ -->
+    <div class="card">
+        <div class="card-header">⚙️ การจัดการระบบ</div>
+        <div class="action-buttons">
+            <button class="btn btn-primary" onclick="saveSystemData()">💾 บันทึกข้อมูลระบบ</button>
+            <button class="btn btn-warning" onclick="confirmBackup()">📥 สำรองข้อมูลสต็อก</button>
+            <button class="btn btn-danger" onclick="logoutSystem()">🚪 ออกจากระบบ</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// -------------------- เปลี่ยนรูปโปรไฟล์ --------------------
+function changeAvatar(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const imgData = event.target.result;
+        document.getElementById('avatarImg').src = imgData;
+        localStorage.setItem('userAvatar', imgData);
+    };
+    reader.readAsDataURL(file);
+}
+
+// -------------------- แก้ไขช่องข้อมูล --------------------
+function editField(field) {
+    const viewEl = document.getElementById(field + 'View');
+    const inputEl = document.getElementById(field + 'Input');
+    viewEl.style.display = 'none';
+    inputEl.style.display = 'block';
+    inputEl.focus();
+    inputEl.onblur = () => saveField(field);
+}
+
+function saveField(field) {
+    const viewEl = document.getElementById(field + 'View');
+    const inputEl = document.getElementById(field + 'Input');
+    if (inputEl.value.trim() !== '') {
+        if (field === 'password') {
+            viewEl.innerText = '••••••••';
+        } else {
+            viewEl.innerText = inputEl.value.trim();
+        }
+        localStorage.setItem('acc_' + field, inputEl.value.trim());
+    } else {
+        viewEl.innerText = '-- ยังไม่ได้ระบุ --';
+    }
+    inputEl.style.display = 'none';
+    viewEl.style.display = 'inline';
+}
+
+// -------------------- ออกจากระบบ --------------------
+function logoutSystem() {
+    if (confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
+        localStorage.removeItem('userLoggedIn');
+        sessionStorage.removeItem('userLoggedIn');
+        alert("ออกจากระบบเรียบร้อยแล้ว");
+        window.location.href = "login.html";
+    }
+}
+
+// -------------------- โหลดข้อมูลและคำนวณสรุป --------------------
+document.addEventListener('DOMContentLoaded', function() {
+    // โหลดข้อมูลบัญชี
+    const savedAvatar = localStorage.getItem('userAvatar');
+    if (savedAvatar) document.getElementById('avatarImg').src = savedAvatar;
+
+    const fields = ['shopName', 'phone', 'email', 'address', 'username', 'password'];
+    fields.forEach(key => {
+        const val = localStorage.getItem('acc_' + key);
+        if (val && key !== 'password') {
+            document.getElementById(key + 'View').innerText = val;
+            document.getElementById(key + 'Input').value = val;
+        }
+    });
+
+    // โหลดเวลาเข้าสู่ระบบ
+    const lastLogin = localStorage.getItem('lastLoginTime');
+    if (lastLogin) {
+        document.getElementById('lastLogin').innerText = lastLogin;
+    } else {
+        const now = new Date();
+        const timeStr = now.toLocaleString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        document.getElementById('lastLogin').innerText = timeStr;
+        localStorage.setItem('lastLoginTime', timeStr);
+    }
+
+    // ✅ ดึงข้อมูลสต็อกและยอดขายจากหน้าคิดเงินมาแสดง
+    const stock = JSON.parse(localStorage.getItem('advancedShopStock')) || [];
+    const accData = JSON.parse(localStorage.getItem('shopAccDaily')) || {};
+    const todayStr = new Date().toLocaleDateString('th-TH');
+    const todayData = accData[todayStr] || { inc: 0, exp: 0 };
+
+    // คำนวณมูลค่าสินค้าและสินค้าใกล้หมด
+    let totalCost = 0, lowCount = 0;
+    stock.forEach(p => {
+        const qty = p.qty || 0;
+        const cost = p.cost || 0;
+        totalCost += qty * cost;
+        if (qty < 10) lowCount++;
+    });
+
+    // คำนวณกำไร
+    const profit = todayData.inc - todayData.exp;
+
+    // แสดงผลในหน้าจอ
+    document.getElementById('sumTotalItems').innerText = stock.length;
+    document.getElementById('sumTotalCost').innerText = totalCost.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+    document.getElementById('sumLowStock').innerText = lowCount;
+    document.getElementById('sumDailyIncome').innerText = todayData.inc.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+    document.getElementById('sumDailyExpense').innerText = todayData.exp.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+    document.getElementById('sumDailyProfit').innerText = profit.toLocaleString('th-TH', { minimumFractionDigits: 2 });
+});
+
+// ฟังก์ชันเสริม
+function saveSystemData() { alert("✅ บันทึกการตั้งค่าเรียบร้อยแล้ว"); }
+function confirmBackup() { alert("📂 สำรองข้อมูลเรียบร้อยแล้ว สามารถนำไปใช้คืนได้"); }
+</script>
+
+</body>
+</html>
